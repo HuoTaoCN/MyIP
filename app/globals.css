@@ -1,26 +1,103 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f4f5fb;
+  --bg-grad-1: #eef0fb;
+  --bg-grad-2: #f6f7fc;
+  --fg: #1e2233;
+  --muted: #6b7280;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-solid: #ffffff;
+  --card-2: #f3f4fb;
+  --border: rgba(124, 108, 245, 0.12);
+  --accent: #7c5cff;
+  --accent-2: #9d7bff;
+  --accent-rgb: 124, 92, 255;
+  --constellation: 124, 108, 245;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --bg: #0a0a14;
+  --bg-grad-1: #11101f;
+  --bg-grad-2: #0a0a14;
+  --fg: #e7e8ee;
+  --muted: #8a8da0;
+  --card: rgba(26, 25, 43, 0.72);
+  --card-solid: #1a1929;
+  --card-2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #8b6dff;
+  --accent-2: #a98bff;
+  --accent-rgb: 139, 109, 255;
+  --constellation: 150, 130, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(900px 500px at 80% -5%, var(--bg-grad-1), transparent),
+    radial-gradient(700px 400px at 0% 10%, var(--bg-grad-1), transparent),
+    var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  min-height: 100vh;
+}
+
+/* Theme-aware surface helpers */
+.surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+.surface-2 {
+  background: var(--card-2);
+}
+.text-fg { color: var(--fg); }
+.text-muted { color: var(--muted); }
+.border-themed { border-color: var(--border); }
+
+/* Purple gradient accent header (matches reference) */
+.accent-header {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+}
+
+/* Subtle tinted card header bar so it stands apart from the body */
+.card-head {
+  background: rgba(var(--accent-rgb), 0.07);
+}
+
+/* Theme-aware "code" block (e.g. raw User-Agent string) */
+.code-block {
+  background: rgba(var(--accent-rgb), 0.09);
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+
+/* Masonry columns */
+.masonry {
+  column-gap: 1rem;
+}
+.masonry > * {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+/* Smooth theme transition */
+* {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
 }

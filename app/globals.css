@@ -4,15 +4,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #f4f5fb;
-  --bg-grad-1: #eef0fb;
-  --bg-grad-2: #f6f7fc;
-  --fg: #1e2233;
-  --muted: #6b7280;
-  --card: rgba(255, 255, 255, 0.9);
+  --bg: #eceef7;
+  --bg-grad-1: #e6e8f6;
+  --bg-grad-2: #f1f2fb;
+  --fg: #14182b;
+  --muted: #5b6170;
+  --card: #ffffff;
   --card-solid: #ffffff;
   --card-2: #f3f4fb;
-  --border: rgba(124, 108, 245, 0.12);
+  --border: rgba(124, 108, 245, 0.16);
   --accent: #7c5cff;
   --accent-2: #9d7bff;
   --accent-rgb: 124, 92, 255;
@@ -23,9 +23,9 @@
   --bg: #0a0a14;
   --bg-grad-1: #11101f;
   --bg-grad-2: #0a0a14;
-  --fg: #e7e8ee;
-  --muted: #8a8da0;
-  --card: rgba(26, 25, 43, 0.72);
+  --fg: #f3f4f9;
+  --muted: #9296a8;
+  --card: rgba(26, 25, 43, 0.82);
   --card-solid: #1a1929;
   --card-2: rgba(255, 255, 255, 0.04);
   --border: rgba(255, 255, 255, 0.08);
@@ -69,9 +69,10 @@ body {
   color: #fff;
 }
 
-/* Subtle tinted card header bar so it stands apart from the body */
+/* Tinted card header bar so it clearly stands apart from the body */
 .card-head {
-  background: rgba(var(--accent-rgb), 0.07);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.2), rgba(var(--accent-rgb), 0.1));
+  border-bottom-color: rgba(var(--accent-rgb), 0.28) !important;
 }
 
 /* Theme-aware "code" block (e.g. raw User-Agent string) */

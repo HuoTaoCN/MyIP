@@ -1,74 +1,70 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Shield, Lock, Eye, Zap } from "lucide-react";
 import Card from "@/components/Card";
-import { TOOLS } from "@/components/toolsRegistry";
-import { useLang } from "@/lib/i18n";
+import SummaryDashboard from "@/components/SummaryDashboard";
+import { TOOLS, CATEGORIES } from "@/components/toolsRegistry";
+import { useLang, pick } from "@/lib/i18n";
 
 export default function HomeContent() {
   const { t, lang } = useLang();
-  const [ip, setIp] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/my-ip")
-      .then((r) => r.json())
-      .then((d) => setIp(d.query ?? d.ip ?? null))
-      .catch(() => setIp(null));
-  }, []);
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="max-w-3xl mx-auto px-4 pt-14 pb-8 text-center">
-        <div className="inline-flex items-center gap-2 surface border-themed px-3 py-1 rounded-full text-xs text-[var(--accent)] mb-5">
-          <Shield size={13} /> {t("免费 · 无需注册 · 不记录数据", "Free · No signup · No logging")}
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4 tracking-tight text-fg">
-          {t("隐私与网络工具包", "Privacy & Network Toolkit")}
-        </h1>
-        <p className="text-lg text-muted mb-7 max-w-xl mx-auto">
-          {t(
-            "一站式检查你的数字足迹 —— IP、浏览器指纹、WebRTC 泄漏、地理位置、SSL 证书等隐私信息。",
-            "Check your entire digital footprint in one place — IP, browser fingerprint, WebRTC leaks, geolocation, SSL and more."
-          )}
-        </p>
+    <div className="max-w-6xl mx-auto px-4 pt-8 pb-6 space-y-10">
+      {/* Primary content — shown immediately */}
+      <SummaryDashboard />
 
-        <div className="inline-flex items-center gap-3 surface border-themed rounded-2xl px-6 py-3">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-sm text-muted">{t("你的 IP", "Your IP")}</span>
-          <span className="font-mono font-bold text-fg text-lg">{ip ?? t("检测中…", "Detecting…")}</span>
-        </div>
+      {/* Secondary content — grouped, collapsed, expand on click */}
+      {CATEGORIES.map((cat, i) => {
+        const tools = TOOLS.filter((tool) => tool.category === cat.key);
+        const Icon = cat.icon;
+        return (
+          <section key={cat.key} className="scroll-mt-20">
+            <div className="accent-header flex items-center gap-3.5 rounded-2xl px-4 sm:px-5 py-3.5 mb-5 shadow-sm">
+              <span className="w-11 h-11 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
+                <Icon size={22} />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-tight">
+                  <span className="opacity-60 font-bold mr-2">{String(i + 1).padStart(2, "0")}</span>
+                  {pick(lang, cat.title)}
+                </h2>
+                <p className="text-xs sm:text-sm text-white/80 truncate">{pick(lang, cat.description)}</p>
+              </div>
+              <span className="ml-auto shrink-0 text-sm font-semibold text-white bg-white/20 rounded-full px-3 py-1">
+                {tools.length}
+              </span>
+            </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mt-7 text-sm text-muted">
-          <span className="inline-flex items-center gap-1.5"><Zap size={15} className="text-[var(--accent)]" /> {t("即时检测", "Instant")}</span>
-          <span className="inline-flex items-center gap-1.5"><Lock size={15} className="text-emerald-500" /> {t("本地运行", "Runs locally")}</span>
-          <span className="inline-flex items-center gap-1.5"><Eye size={15} className="text-[var(--accent-2)]" /> {t("隐私优先", "Privacy-first")}</span>
-        </div>
-      </section>
+            <div className="masonry columns-1 md:columns-2">
+              {tools.map((tool) => {
+                const Tool = tool.Component;
+                return (
+                  <Card
+                    key={tool.slug}
+                    id={tool.slug}
+                    icon={tool.icon}
+                    accent={tool.accent}
+                    title={pick(lang, tool.title)}
+                    description={pick(lang, tool.description)}
+                    info={pick(lang, tool.info)}
+                  >
+                    <Tool />
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
 
-      {/* Masonry grid of tool cards */}
-      <section className="max-w-7xl mx-auto px-4 pb-6 masonry columns-1 md:columns-2 xl:columns-3">
-        {TOOLS.map((tool) => {
-          const Tool = tool.Component;
-          return (
-            <Card
-              key={tool.slug}
-              id={tool.slug}
-              icon={tool.icon}
-              accent={tool.accent}
-              title={lang === "zh" ? tool.title.zh : tool.title.en}
-              info={lang === "zh" ? tool.info.zh : tool.info.en}
-            >
-              <Tool />
-            </Card>
-          );
-        })}
-      </section>
-
-      <p className="text-center text-xs text-muted pb-10">
+      <p className="text-center text-xs text-muted pt-2">
         {t(
-          "数据由 ip-api.com 与公共 RDAP 服务提供 · 所有浏览器检测均在你的设备本地完成",
-          "Data via ip-api.com & public RDAP services · All browser checks run locally on your device"
+          "数据由 ip-api.com 与公共 RDAP / DNSBL 服务提供 · 所有浏览器检测均在你的设备本地完成",
+          "Data via ip-api.com & public RDAP / DNSBL services · All browser checks run locally on your device",
+          {
+            ja: "データは ip-api.com と公開 RDAP / DNSBL サービスより · ブラウザ検査はすべて端末上で実行",
+            de: "Daten via ip-api.com & öffentliche RDAP / DNSBL-Dienste · Alle Browser-Checks laufen lokal",
+            ko: "데이터 제공: ip-api.com 및 공개 RDAP / DNSBL · 모든 브라우저 검사는 기기에서 로컬 실행",
+          }
         )}
       </p>
     </div>

@@ -85,6 +85,7 @@ export default function SslTlsTool() {
               </div>
             </div>
           )}
+          <p className="text-xs text-muted">{t("数据来自证书透明（CT）日志（crt.sh），不含实时 TLS 版本与加密套件。", "Data from Certificate Transparency logs (crt.sh); live TLS version & cipher are not included.")}</p>
         </div>
       )}
     </div>

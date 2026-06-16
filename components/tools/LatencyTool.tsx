@@ -5,11 +5,12 @@ import { useLang } from "@/lib/i18n";
 
 interface Target { name: string; url: string; }
 const TARGETS: Target[] = [
-  { name: "Cloudflare", url: "https://cloudflare.com/cdn-cgi/trace" },
+  { name: "百度 Baidu", url: "https://www.baidu.com/favicon.ico" },
+  { name: "腾讯 QQ", url: "https://www.qq.com/favicon.ico" },
+  { name: "淘宝 Taobao", url: "https://www.taobao.com/favicon.ico" },
+  { name: "哔哩哔哩 Bilibili", url: "https://www.bilibili.com/favicon.ico" },
+  { name: "京东 JD", url: "https://www.jd.com/favicon.ico" },
   { name: "Google", url: "https://www.google.com/generate_204" },
-  { name: "GitHub", url: "https://github.com/favicon.ico" },
-  { name: "Microsoft", url: "https://www.microsoft.com/favicon.ico" },
-  { name: "Apple", url: "https://www.apple.com/favicon.ico" },
 ];
 
 async function ping(url: string): Promise<number | null> {

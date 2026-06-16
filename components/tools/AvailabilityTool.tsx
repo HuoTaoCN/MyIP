@@ -5,13 +5,17 @@ import { useLang } from "@/lib/i18n";
 
 interface Site { name: string; url: string; }
 const SITES: Site[] = [
+  // 国内流行站点（通常可达）
+  { name: "百度 Baidu", url: "https://www.baidu.com/favicon.ico" },
+  { name: "淘宝 Taobao", url: "https://www.taobao.com/favicon.ico" },
+  { name: "腾讯 QQ", url: "https://www.qq.com/favicon.ico" },
+  { name: "哔哩哔哩 Bilibili", url: "https://www.bilibili.com/favicon.ico" },
+  { name: "微博 Weibo", url: "https://weibo.com/favicon.ico" },
+  { name: "京东 JD", url: "https://www.jd.com/favicon.ico" },
+  // 国外站点（用于探测网络封锁）
   { name: "Google", url: "https://www.google.com/generate_204" },
-  { name: "GitHub", url: "https://github.com/favicon.ico" },
   { name: "YouTube", url: "https://www.youtube.com/favicon.ico" },
-  { name: "Wikipedia", url: "https://www.wikipedia.org/favicon.ico" },
-  { name: "X (Twitter)", url: "https://x.com/favicon.ico" },
-  { name: "ChatGPT", url: "https://chatgpt.com/favicon.ico" },
-  { name: "Cloudflare", url: "https://cloudflare.com/cdn-cgi/trace" },
+  { name: "GitHub", url: "https://github.com/favicon.ico" },
 ];
 
 async function check(url: string, timeout = 6000): Promise<boolean> {

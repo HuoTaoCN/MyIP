@@ -21,13 +21,13 @@ export default function Navbar() {
 
         <nav className="ml-auto flex items-center gap-3">
           <Link href="/" className="hidden md:inline text-sm text-muted hover:text-fg">
-            {t("首页", "Home")}
+            {t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈" })}
           </Link>
           <Link href="/faq" className="hidden md:inline text-sm text-muted hover:text-fg">
-            {t("常见问题", "FAQ")}
+            {t("常见问题", "FAQ", { ja: "よくある質問", de: "FAQ", ko: "FAQ" })}
           </Link>
           <Link href="/about" className="hidden md:inline text-sm text-muted hover:text-fg">
-            {t("关于", "About")}
+            {t("关于", "About", { ja: "概要", de: "Über", ko: "소개" })}
           </Link>
           <LanguageSwitcher />
         </nav>

@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { doh } from "@/lib/doh";
 
-// DNS-over-HTTPS resolver proxy (Cloudflare). Resolves A/AAAA/MX/TXT/NS/CNAME etc.
+// DNS-over-HTTPS resolver proxy. Resolves A/AAAA/MX/TXT/NS/CNAME etc.
+// Uses Cloudflare with a Google fallback for resilience.
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.searchParams.get("name")?.trim() ?? "";
   const type = (req.nextUrl.searchParams.get("type") ?? "A").trim().toUpperCase();
   if (!name) return NextResponse.json({ error: "缺少 name 参数" }, { status: 400 });
 
   try {
-    const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
-    const res = await fetch(url, {
-      headers: { Accept: "application/dns-json" },
-      cache: "no-store",
-    });
-    const data = await res.json();
+    const data = await doh(name, type);
     return NextResponse.json(data);
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);

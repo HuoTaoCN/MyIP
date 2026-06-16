@@ -1,44 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import tls from "tls";
+
+// crt.sh Certificate Transparency log entry shape (fields we use).
+interface CrtEntry {
+  issuer_name: string;
+  common_name: string;
+  name_value: string; // newline-separated SANs
+  not_before: string;
+  not_after: string;
+  serial_number: string;
+}
+
+// Parse a "C=US, O=Let's Encrypt, CN=R3" distinguished name into parts.
+function parseDN(dn: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const part of dn.split(/,\s*/)) {
+    const eq = part.indexOf("=");
+    if (eq > 0) out[part.slice(0, eq).trim()] = part.slice(eq + 1).trim();
+  }
+  return out;
+}
+
+function names(e: CrtEntry): string[] {
+  return [e.common_name, ...e.name_value.split(/\n/)].map((n) => n.trim().toLowerCase()).filter(Boolean);
+}
+
+// Does this cert cover the requested host (exact or matching wildcard)?
+function covers(e: CrtEntry, host: string): boolean {
+  return names(e).some((n) => {
+    if (n === host) return true;
+    if (n.startsWith("*.")) {
+      const base = n.slice(2);
+      return host.endsWith(`.${base}`) && host.split(".").length === n.split(".").length;
+    }
+    return false;
+  });
+}
 
 export async function GET(req: NextRequest) {
-  const host = req.nextUrl.searchParams.get("host")?.trim().replace(/^https?:\/\//, "").split("/")[0] ?? "";
+  const host = req.nextUrl.searchParams.get("host")?.trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0] ?? "";
   if (!host) return NextResponse.json({ error: "缺少 host 参数" }, { status: 400 });
 
-  return new Promise<NextResponse>((resolve) => {
-    const socket = tls.connect({ host, port: 443, servername: host, timeout: 8000 }, () => {
-      const cert = socket.getPeerCertificate(true);
-      socket.destroy();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const url = `https://crt.sh/?q=${encodeURIComponent(host)}&output=json&exclude=expired`;
+    const res = await fetch(url, { signal: ctrl.signal, cache: "no-store", headers: { "User-Agent": "MyIP-SSL-Tool" } });
+    clearTimeout(timer);
+    if (!res.ok) return NextResponse.json({ host, error: `crt.sh 返回 ${res.status}` }, { status: 502 });
 
-      if (!cert || !cert.subject) {
-        resolve(NextResponse.json({ error: "无法获取证书" }, { status: 500 }));
-        return;
-      }
+    const entries: CrtEntry[] = await res.json().catch(() => []);
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return NextResponse.json({ host, error: "未在证书透明日志中找到该域名的证书" }, { status: 404 });
+    }
 
-      resolve(NextResponse.json({
-        host,
-        subject: cert.subject,
-        issuer: cert.issuer,
-        validFrom: cert.valid_from,
-        validTo: cert.valid_to,
-        serialNumber: cert.serialNumber,
-        fingerprint: cert.fingerprint,
-        fingerprint256: cert.fingerprint256,
-        san: cert.subjectaltname ?? "",
-        protocol: socket.getProtocol(),
-        cipher: socket.getCipher(),
-        authorized: socket.authorized,
-        authorizationError: socket.authorizationError,
-      }));
+    // Prefer certs that actually cover the host; pick the one valid the longest.
+    const matching = entries.filter((e) => covers(e, host));
+    const pool = matching.length ? matching : entries;
+    const cert = pool.reduce((a, b) => (new Date(b.not_after) > new Date(a.not_after) ? b : a));
+
+    const issuer = parseDN(cert.issuer_name);
+    const allNames = Array.from(new Set(pool.flatMap(names))).sort();
+    const now = new Date();
+
+    return NextResponse.json({
+      host,
+      subject: { CN: cert.common_name },
+      issuer: { O: issuer.O, CN: issuer.CN },
+      validFrom: cert.not_before,
+      validTo: cert.not_after,
+      serialNumber: cert.serial_number,
+      san: allNames.map((n) => `DNS:${n}`).join(", "),
+      authorized: new Date(cert.not_after) > now && new Date(cert.not_before) <= now,
+      source: "crt.sh",
     });
-
-    socket.on("error", (err) => {
-      resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-    });
-
-    socket.setTimeout(8000, () => {
-      socket.destroy();
-      resolve(NextResponse.json({ error: "连接超时" }, { status: 504 }));
-    });
-  });
+  } catch (e: unknown) {
+    clearTimeout(timer);
+    const msg = e instanceof Error && e.name === "AbortError" ? "查询超时（crt.sh 响应慢，请重试）" : e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ host, error: msg }, { status: 504 });
+  }
 }

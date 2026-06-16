@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Globe } from "lucide-react";
-import { useLang } from "@/lib/i18n";
+import { useLang, LANGS } from "@/lib/i18n";
 
 export default function LanguageSwitcher() {
   const { lang, setLang } = useLang();
@@ -16,11 +16,7 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener("click", onClick);
   }, []);
 
-  const options: { value: "zh" | "en"; label: string }[] = [
-    { value: "zh", label: "简体中文" },
-    { value: "en", label: "English" },
-  ];
-  const current = options.find((o) => o.value === lang)!;
+  const current = LANGS.find((o) => o.value === lang)!;
 
   return (
     <div className="relative" ref={ref}>
@@ -34,7 +30,7 @@ export default function LanguageSwitcher() {
       </button>
       {open && (
         <div className="absolute right-0 mt-2 w-36 surface border-themed rounded-xl shadow-xl overflow-hidden z-50 py-1">
-          {options.map((o) => (
+          {LANGS.map((o) => (
             <button
               key={o.value}
               onClick={() => { setLang(o.value); setOpen(false); }}

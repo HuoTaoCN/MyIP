@@ -1,7 +1,7 @@
 import {
   Globe, MapPin, Search, RotateCcw, List, Monitor, Languages,
   Smartphone, Wifi, Radio, Lock, Fingerprint, ShieldCheck, ShieldAlert, LucideIcon,
-  Network, Boxes, Gauge, Download, Globe2, Cpu,
+  Network, Boxes, Gauge, Download, Cpu, Layers, Server, Activity, Split, Route,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import type { ML } from "@/lib/i18n";
@@ -21,11 +21,14 @@ import BrowserFingerprintTool from "@/components/tools/BrowserFingerprintTool";
 import PrivacyAssessmentTool from "@/components/tools/PrivacyAssessmentTool";
 import DnsResolverTool from "@/components/tools/DnsResolverTool";
 import DualStackTool from "@/components/tools/DualStackTool";
-import LatencyTool from "@/components/tools/LatencyTool";
 import SpeedTestTool from "@/components/tools/SpeedTestTool";
-import AvailabilityTool from "@/components/tools/AvailabilityTool";
 import MacLookupTool from "@/components/tools/MacLookupTool";
 import IpReputationTool from "@/components/tools/IpReputationTool";
+import IpSourcesTool from "@/components/tools/IpSourcesTool";
+import CdnNodeTool from "@/components/tools/CdnNodeTool";
+import DnsEgressTool from "@/components/tools/DnsEgressTool";
+import MultiEgressTool from "@/components/tools/MultiEgressTool";
+import ConnectivityTool from "@/components/tools/ConnectivityTool";
 
 export type CategoryKey = "ip-network" | "privacy-security" | "browser-device" | "diagnostics";
 
@@ -114,6 +117,13 @@ export const TOOLS: ToolDef[] = [
     info: { zh: "MAC 地址前 3 字节（OUI）由 IEEE 分配给硬件厂商。输入 MAC 地址即可查询其对应的设备制造商。", en: "The first 3 bytes (OUI) of a MAC are assigned by IEEE to vendors. Enter a MAC to look up its hardware manufacturer." },
     Component: MacLookupTool,
   },
+  {
+    slug: "ip-sources", category: "ip-network", icon: Layers,
+    title: { zh: "多来源 IP 对比", en: "Multi-source Compare", ja: "マルチソース比較", de: "Multi-Quellen-Vergleich", ko: "다중 소스 비교" },
+    description: { zh: "并列多个数据源对同一 IP 的归属判断", en: "Compare how multiple databases locate one IP" },
+    info: { zh: "同时向多个公共 IP 库（ip-api、ip.sb、ipinfo、ipwho.is）查询同一个 IP，并列展示各自的归属与运营商判断。不同库结果常有差异，尤其国内/国际库对中国相关 IP。", en: "Queries several public IP databases (ip-api, ip.sb, ipinfo, ipwho.is) for the same IP and shows their location/ISP verdicts side by side. Databases often disagree, especially domestic vs international ones." },
+    Component: IpSourcesTool,
+  },
 
   // ───────────────────────── ② 隐私与安全 ─────────────────────────
   {
@@ -198,11 +208,11 @@ export const TOOLS: ToolDef[] = [
     Component: DnsResolverTool,
   },
   {
-    slug: "latency", category: "diagnostics", icon: Gauge,
-    title: { zh: "延迟测试", en: "Latency Test", ja: "レイテンシテスト", de: "Latenztest", ko: "지연 시간 테스트" },
-    description: { zh: "测量到全球主流站点的网络延迟", en: "Measure latency to major global sites" },
-    info: { zh: "测量你的浏览器到 Cloudflare、Google、GitHub 等站点的往返延迟（RTT），帮助评估网络质量与就近程度。", en: "Measures round-trip latency from your browser to Cloudflare, Google, GitHub and others to gauge network quality and proximity." },
-    Component: LatencyTool,
+    slug: "connectivity", category: "diagnostics", icon: Activity,
+    title: { zh: "连通性与延迟", en: "Connectivity & Latency", ja: "接続性とレイテンシ", de: "Konnektivität & Latenz", ko: "연결성 및 지연" },
+    description: { zh: "国内/国际站点的可达性与延迟一览", en: "Reachability + latency for domestic & global sites" },
+    info: { zh: "从你的浏览器直接探测一批国内与国际站点的可达性与往返延迟，按地区分组展示。国际站点不可达可粗略反映网络封锁，延迟为近似值（受 CORS 限制）。", en: "Probes reachability and round-trip latency to a set of domestic and international sites directly from your browser, grouped by region. Unreachable international sites roughly indicate blocking; latency is approximate (CORS-limited)." },
+    Component: ConnectivityTool,
   },
   {
     slug: "speed-test", category: "diagnostics", icon: Download,
@@ -212,10 +222,24 @@ export const TOOLS: ToolDef[] = [
     Component: SpeedTestTool,
   },
   {
-    slug: "availability", category: "diagnostics", icon: Globe2,
-    title: { zh: "网站可达性", en: "Site Availability", ja: "サイト到達性", de: "Website-Erreichbarkeit", ko: "사이트 접근성" },
-    description: { zh: "检测主流网站是否可访问", en: "Check if major sites are reachable" },
-    info: { zh: "从你的浏览器直接探测 Google、GitHub、YouTube、ChatGPT 等站点是否可达，可用于粗略判断网络封锁或审查状况。", en: "Probes whether Google, GitHub, YouTube, ChatGPT and others are reachable from your browser — a rough check for network blocking or censorship." },
-    Component: AvailabilityTool,
+    slug: "cdn-node", category: "diagnostics", icon: Server,
+    title: { zh: "CDN 边缘节点", en: "CDN Edge Node", ja: "CDNエッジノード", de: "CDN-Edge-Knoten", ko: "CDN 엣지 노드" },
+    description: { zh: "你命中的 Cloudflare 边缘机房", en: "Which Cloudflare PoP serves you" },
+    info: { zh: "读取同源 /cdn-cgi/trace，显示你实际连接到的 Cloudflare 边缘节点（colo/机场码，映射到城市）、节点地区、HTTP 与 TLS 版本。可据此判断就近接入质量。", en: "Reads same-origin /cdn-cgi/trace to show the Cloudflare edge node (colo/airport code, mapped to a city) your connection actually reached, plus node region, HTTP and TLS versions." },
+    Component: CdnNodeTool,
+  },
+  {
+    slug: "multi-egress", category: "diagnostics", icon: Split,
+    title: { zh: "多出口 IP 检测", en: "Multi-egress IP", ja: "マルチ出口IP", de: "Multi-Egress-IP", ko: "다중 출구 IP" },
+    description: { zh: "检测流量是否从多个 IP 出去", en: "Detect if traffic exits via multiple IPs" },
+    info: { zh: "并发多次读取你的出口 IP；若出现多个不同 IP，通常意味着你在使用负载均衡代理池或按策略分流的网络。", en: "Reads your egress IP several times in parallel; multiple distinct IPs usually mean a load-balanced proxy pool or policy-based split routing." },
+    Component: MultiEgressTool,
+  },
+  {
+    slug: "dns-egress", category: "diagnostics", icon: Route,
+    title: { zh: "DNS 出口查询", en: "DNS Egress", ja: "DNS出口", de: "DNS-Egress", ko: "DNS 출구" },
+    description: { zh: "解析链路的出口 IP 与 ECS", en: "Resolver egress IP & EDNS client subnet" },
+    info: { zh: "通过特殊 DNS 记录查询解析链路的出口 IP 与 EDNS 客户端子网（ECS）。注意：此结果反映的是经公共解析器（Cloudflare/Google）的出口，并非你系统 DNS 的真实出口；完整 DNS 泄漏检测需自建权威 DNS。", en: "Queries a special DNS record for the resolver chain's egress IP and EDNS Client Subnet (ECS). Note: this reflects the egress of the public resolver (Cloudflare/Google) our query traverses, not your system DNS's real egress; a full DNS-leak test needs a self-hosted authoritative server." },
+    Component: DnsEgressTool,
   },
 ];

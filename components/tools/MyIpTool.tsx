@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import InfoTable from "@/components/InfoTable";
 import { Shield, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { assessIp, type IpTypeKey } from "@/lib/ipRisk";
 
 interface IpData {
   query?: string; ip?: string; isp?: string; org?: string; as?: string; asname?: string;
@@ -42,7 +43,16 @@ export default function MyIpTool() {
     { label: t("时区", "Timezone"), value: data?.timezone },
     { label: t("经纬度", "Lat/Long"), value: data?.lat ? `${data.lat}, ${data.lon}` : undefined },
   ];
+  const risk = data ? assessIp(data) : null;
+  const typeLabel: Record<IpTypeKey, string> = {
+    residential: t("住宅宽带", "Residential"),
+    datacenter: t("数据中心/机房", "Datacenter"),
+    mobile: t("移动网络", "Mobile"),
+    proxy: t("代理 / VPN", "Proxy / VPN"),
+  };
   const privacyRows = [
+    { label: t("IP 类型", "IP type"), value: risk ? typeLabel[risk.typeKey] : undefined, highlight: true },
+    { label: t("风险评分", "Risk score"), value: risk ? `${risk.score} / 100` : undefined },
     { label: t("VPN / 代理", "VPN / Proxy"), value: data?.proxy ? t("检测到", "Detected") : t("未检测到", "Not detected") },
     { label: t("数据中心/托管", "Datacenter"), value: data?.hosting ? t("是", "Yes") : t("否", "No") },
     { label: t("移动网络", "Mobile"), value: data?.mobile ? t("是", "Yes") : t("否", "No") },

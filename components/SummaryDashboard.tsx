@@ -1,19 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Check, Loader2, MapPin, Building2, ShieldCheck, AlertTriangle, Network } from "lucide-react";
+import { Copy, Check, Loader2, MapPin, Building2, ShieldCheck, AlertTriangle, Network, Server, Terminal } from "lucide-react";
 import { useLang } from "@/lib/i18n";
+import { flag } from "@/lib/flag";
+import { assessIp, type IpTypeKey } from "@/lib/ipRisk";
+import { fetchTrace, coloCity } from "@/lib/trace";
 
 interface IpData {
   query?: string; ip?: string; isp?: string; org?: string; as?: string; asname?: string;
   hosting?: boolean; mobile?: boolean; proxy?: boolean;
   country?: string; countryCode?: string; city?: string; regionName?: string;
-}
-
-// Two-letter country code -> flag emoji (regional indicator symbols).
-function flag(cc?: string): string {
-  if (!cc || cc.length !== 2) return "🏳️";
-  const A = 0x1f1e6;
-  return String.fromCodePoint(...[...cc.toUpperCase()].map((c) => A + c.charCodeAt(0) - 65));
 }
 
 // WebRTC can reveal IPs that bypass an HTTP proxy — used to surface the real /
@@ -31,7 +27,7 @@ const isRealIp = (ip: string) => /[.:]/.test(ip) && !ip.endsWith(".local") && !i
 interface ScoreFactor { label: string; pts: number; on: boolean }
 
 export default function SummaryDashboard() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [data, setData] = useState<IpData | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -40,10 +36,13 @@ export default function SummaryDashboard() {
   // matches the server (both use the false baseline) — avoids hydration mismatch.
   const [clientFlags, setClientFlags] = useState({ dnt: false, cookiesOff: false });
   const [rtcIps, setRtcIps] = useState<string[]>([]);
+  const [colo, setColo] = useState<string | null>(null);
+  const [cmdCopied, setCmdCopied] = useState(false);
   const rtcDone = useRef(false);
 
   useEffect(() => {
     fetch("/api/my-ip").then((r) => r.json()).then(setData).catch(() => setData(null)).finally(() => setLoading(false));
+    fetchTrace().then((tr) => setColo(tr.colo ?? null)).catch(() => setColo(null));
     setClientFlags({
       dnt: navigator.doNotTrack === "1" || (navigator as unknown as { msDoNotTrack?: string }).msDoNotTrack === "1",
       cookiesOff: navigator.cookieEnabled === false,
@@ -97,11 +96,29 @@ export default function SummaryDashboard() {
       ? { label: t("中等", "Moderate"), color: "#f59e0b" }
       : { label: t("易被识别", "Exposed"), color: "#ef4444" };
 
+  // IP type + risk score (from ip-api proxy/hosting/mobile flags).
+  const risk = data ? assessIp(data) : null;
+  const typeLabel: Record<IpTypeKey, string> = {
+    residential: t("住宅宽带", "Residential"),
+    datacenter: t("数据中心/机房", "Datacenter"),
+    mobile: t("移动网络", "Mobile"),
+    proxy: t("代理 / VPN", "Proxy / VPN"),
+  };
+  const riskColor = risk?.level === "high" ? "text-red-500" : risk?.level === "medium" ? "text-amber-500" : "text-emerald-500";
+
   function copy() {
     if (!ip) return;
     navigator.clipboard?.writeText(ip).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  const curlCmd = "curl ip.huotao.com";
+  function copyCmd() {
+    navigator.clipboard?.writeText(curlCmd).then(() => {
+      setCmdCopied(true);
+      setTimeout(() => setCmdCopied(false), 1500);
     });
   }
 
@@ -159,7 +176,7 @@ export default function SummaryDashboard() {
             </div>
           )}
 
-          <div className="grid sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
               <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><MapPin size={13} /> {t("位置", "Location", { ja: "位置", de: "Standort", ko: "위치" })}</div>
@@ -174,16 +191,30 @@ export default function SummaryDashboard() {
               <div className="text-sm font-semibold text-fg truncate" title={data?.isp}>{data?.isp ?? "—"}</div>
               <div className="text-xs text-muted truncate">{data?.as ?? ""}</div>
             </div>
-            {/* VPN status */}
+            {/* IP type + risk score */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
               <div className="flex items-center gap-1.5 text-xs text-muted mb-1">
                 {isAnon ? <AlertTriangle size={13} className="text-amber-500" /> : <ShieldCheck size={13} className="text-emerald-500" />}
-                {t("连接", "Connection", { ja: "接続", de: "Verbindung", ko: "연결" })}
+                {t("IP 类型 · 风险", "IP type · risk", { ja: "IPタイプ・リスク", de: "IP-Typ · Risiko", ko: "IP 유형 · 위험" })}
               </div>
-              <div className={`text-sm font-semibold ${isAnon ? "text-amber-500" : "text-emerald-500"}`}>
-                {isAnon ? t("VPN / 代理", "VPN / Proxy") : t("直连", "Direct")}
-              </div>
+              <div className={`text-sm font-semibold truncate ${riskColor}`}>{risk ? typeLabel[risk.typeKey] : "—"}</div>
+              {risk && <div className="text-xs text-muted">{t("风险", "Risk")} {risk.score}/100</div>}
             </div>
+            {/* CDN edge node */}
+            <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><Server size={13} /> {t("CDN 节点", "CDN node", { ja: "CDNノード", de: "CDN-Knoten", ko: "CDN 노드" })}</div>
+              <div className="text-sm font-semibold text-fg truncate">{colo ?? "—"}</div>
+              {colo && coloCity(colo, lang === "zh") && <div className="text-xs text-muted truncate">{coloCity(colo, lang === "zh")}</div>}
+            </div>
+          </div>
+
+          {/* Terminal one-liner */}
+          <div className="mt-3 flex items-center gap-2 surface-2 border border-themed rounded-xl px-3.5 py-2.5">
+            <Terminal size={14} className="text-[var(--accent)] shrink-0" />
+            <code className="text-sm font-mono text-fg truncate flex-1">{curlCmd}</code>
+            <button onClick={copyCmd} className="p-1.5 rounded-md text-muted hover:surface shrink-0" aria-label="copy command">
+              {cmdCopied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+            </button>
           </div>
         </div>
 

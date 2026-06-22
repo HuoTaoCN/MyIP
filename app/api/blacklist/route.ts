@@ -11,9 +11,11 @@ const ZONES: { zone: string; name: string }[] = [
 ];
 
 function clientIp(req: NextRequest): string {
+  // CF-Connecting-IP is Cloudflare's canonical visitor IP (x-forwarded-for is the edge).
+  const cf = req.headers.get("cf-connecting-ip");
   const forwarded = req.headers.get("x-forwarded-for");
   const realIp = req.headers.get("x-real-ip");
-  return forwarded ? forwarded.split(",")[0].trim() : realIp ?? "127.0.0.1";
+  return cf?.trim() || (forwarded ? forwarded.split(",")[0].trim() : realIp ?? "127.0.0.1");
 }
 
 function isPrivateOrLocal(ip: string): boolean {

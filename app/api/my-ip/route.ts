@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  // On Cloudflare the real visitor IP is in CF-Connecting-IP; x-forwarded-for
+  // there points at Cloudflare's own edge, which is why every lookup otherwise
+  // resolved to a Cloudflare AS13335 address.
+  const cf = req.headers.get("cf-connecting-ip");
   const forwarded = req.headers.get("x-forwarded-for");
   const realIp = req.headers.get("x-real-ip");
-  const ip = forwarded ? forwarded.split(",")[0].trim() : realIp ?? "127.0.0.1";
+  const ip = cf?.trim() || (forwarded ? forwarded.split(",")[0].trim() : realIp ?? "127.0.0.1");
 
   // Local / private IPs (localhost dev) can't be geolocated — query without an
   // explicit IP so ip-api returns the server's real public egress IP instead.

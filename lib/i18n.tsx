@@ -1,14 +1,19 @@
 "use client";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type Lang = "zh" | "en" | "ja" | "de" | "ko";
+export type Lang = "zh" | "en" | "de" | "fr" | "es" | "ja" | "ko" | "ru" | "vi" | "pt";
 
-export const LANGS: { value: Lang; label: string }[] = [
-  { value: "zh", label: "简体中文" },
-  { value: "en", label: "English" },
-  { value: "ja", label: "日本語" },
-  { value: "de", label: "Deutsch" },
-  { value: "ko", label: "한국어" },
+export const LANGS: { value: Lang; label: string; flag: string }[] = [
+  { value: "zh", label: "简体中文", flag: "🇨🇳" },
+  { value: "en", label: "English", flag: "🇺🇸" },
+  { value: "de", label: "Deutsch", flag: "🇩🇪" },
+  { value: "fr", label: "Français", flag: "🇫🇷" },
+  { value: "es", label: "Español", flag: "🇪🇸" },
+  { value: "ja", label: "日本語", flag: "🇯🇵" },
+  { value: "ko", label: "한국어", flag: "🇰🇷" },
+  { value: "ru", label: "Русский", flag: "🇷🇺" },
+  { value: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { value: "pt", label: "Português", flag: "🇵🇹" },
 ];
 
 // A multilingual string: zh + en are required, others optional (fall back to en).
@@ -36,6 +41,11 @@ function detectLang(): Lang {
   if (l.startsWith("ja")) return "ja";
   if (l.startsWith("de")) return "de";
   if (l.startsWith("ko")) return "ko";
+  if (l.startsWith("fr")) return "fr";
+  if (l.startsWith("es")) return "es";
+  if (l.startsWith("ru")) return "ru";
+  if (l.startsWith("vi")) return "vi";
+  if (l.startsWith("pt")) return "pt";
   return "en";
 }
 
@@ -52,8 +62,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     setLangState(l);
     try {
       localStorage.setItem("lang", l);
-      document.documentElement.lang =
-        l === "zh" ? "zh-CN" : l === "ja" ? "ja" : l === "de" ? "de" : l === "ko" ? "ko" : "en";
+      document.documentElement.lang = l === "zh" ? "zh-CN" : l;
     } catch { /* ignore */ }
   }
 

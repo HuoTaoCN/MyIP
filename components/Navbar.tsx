@@ -9,17 +9,17 @@ export default function Navbar() {
   const { t } = useLang();
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md border-b border-themed bg-[var(--bg)]/70">
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-3">
-        {/* Left: theme switcher (per request) + logo */}
-        <ThemeSwitcher />
-        <Link href="/" className="flex items-center gap-2 font-bold text-fg">
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        {/* Left: logo */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-fg shrink-0">
           <span className="w-7 h-7 rounded-lg accent-header flex items-center justify-center">
             <Shield size={16} className="text-white" />
           </span>
-          <span className="hidden sm:inline">MyIP</span>
+          <span>MyIP</span>
         </Link>
 
-        <nav className="ml-auto flex items-center gap-3">
+        {/* Right: nav links + controls, all vertically centered */}
+        <nav className="flex items-center gap-2 sm:gap-4">
           <Link href="/" className="hidden md:inline text-sm text-muted hover:text-fg">
             {t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈" })}
           </Link>
@@ -29,7 +29,10 @@ export default function Navbar() {
           <Link href="/about" className="hidden md:inline text-sm text-muted hover:text-fg">
             {t("关于", "About", { ja: "概要", de: "Über", ko: "소개" })}
           </Link>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+          </div>
         </nav>
       </div>
     </header>

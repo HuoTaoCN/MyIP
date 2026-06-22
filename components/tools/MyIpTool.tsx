@@ -4,6 +4,7 @@ import InfoTable from "@/components/InfoTable";
 import { Shield, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { assessIp, type IpTypeKey } from "@/lib/ipRisk";
+import { flag } from "@/lib/flag";
 
 interface IpData {
   query?: string; ip?: string; isp?: string; org?: string; as?: string; asname?: string;
@@ -36,7 +37,7 @@ export default function MyIpTool() {
     { label: t("主机类型", "Host type"), value: data?.hosting ? t("数据中心/托管", "Datacenter") : data?.mobile ? t("移动网络", "Mobile") : t("固定宽带", "Broadband") },
   ];
   const locationRows = [
-    { label: t("国家", "Country"), value: data?.country ? `${data.country} (${data.countryCode})` : undefined },
+    { label: t("国家", "Country"), value: data?.country ? `${flag(data.countryCode)} ${data.country} (${data.countryCode})` : undefined },
     { label: t("省/州", "Region"), value: data?.regionName ? `${data.regionName} (${data.region})` : undefined },
     { label: t("城市", "City"), value: data?.city },
     { label: t("邮政编码", "ZIP"), value: data?.zip },

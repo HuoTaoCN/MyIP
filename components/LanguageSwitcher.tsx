@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Globe } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { useLang, LANGS } from "@/lib/i18n";
 
 export default function LanguageSwitcher() {
@@ -23,19 +23,21 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg surface border-themed hover:opacity-80 text-sm text-fg"
+        aria-label="language"
       >
-        <Globe size={15} />
+        <span className="text-base leading-none">{current.flag}</span>
         <span className="hidden sm:inline">{current.label}</span>
         <ChevronDown size={13} className="text-muted" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-36 surface border-themed rounded-xl shadow-xl overflow-hidden z-50 py-1">
+        <div className="absolute right-0 mt-2 w-44 max-h-[70vh] overflow-y-auto surface border-themed rounded-xl shadow-xl z-50 py-1">
           {LANGS.map((o) => (
             <button
               key={o.value}
               onClick={() => { setLang(o.value); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-fg hover:surface-2 text-left"
             >
+              <span className="text-base leading-none">{o.flag}</span>
               <span className="flex-1">{o.label}</span>
               {lang === o.value && <Check size={14} className="text-[var(--accent)]" />}
             </button>

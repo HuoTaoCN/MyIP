@@ -41,29 +41,7 @@ export default function SummaryDashboard() {
   const rtcDone = useRef(false);
 
   useEffect(() => {
-    // Prefer the IPv4 address: on dual-stack / mobile networks the connection
-    // (CF-Connecting-IP) is often IPv6, but most users expect their IPv4. Get it
-    // from an IPv4-only endpoint and geolocate that; fall back to the connection IP.
-    (async () => {
-      try {
-        const r = await fetch("https://api4.ipify.org?format=json", { cache: "no-store" });
-        const v4 = (await r.json())?.ip as string | undefined;
-        if (v4 && /^(\d{1,3}\.){3}\d{1,3}$/.test(v4)) {
-          const g = await fetch(`/api/geoip?ip=${v4}`, { cache: "no-store" });
-          const gd = await g.json();
-          setData(gd?.status === "success" ? gd : { ...gd, query: v4, ip: v4 });
-          return;
-        }
-        throw new Error("no ipv4");
-      } catch {
-        try {
-          const m = await fetch("/api/my-ip");
-          setData(await m.json());
-        } catch {
-          setData(null);
-        }
-      }
-    })().finally(() => setLoading(false));
+    fetch("/api/my-ip").then((r) => r.json()).then(setData).catch(() => setData(null)).finally(() => setLoading(false));
     fetchTrace().then((tr) => setColo(tr.colo ?? null)).catch(() => setColo(null));
     setClientFlags({
       dnt: navigator.doNotTrack === "1" || (navigator as unknown as { msDoNotTrack?: string }).msDoNotTrack === "1",
@@ -93,12 +71,19 @@ export default function SummaryDashboard() {
     } catch { /* WebRTC unsupported */ }
   }, []);
 
-  const ip = data?.query ?? data?.ip;
+  const isV4 = (x?: string | null) => !!x && /^(\d{1,3}\.){3}\d{1,3}$/.test(x);
+  const connIp = data?.query ?? data?.ip; // the IP that connected (what sites see)
+  const rtcPublic = rtcIps.filter((x) => !isPrivateIp(x));
+  // Prefer IPv4 for display: on an IPv6 connection (common on mobile/dual-stack),
+  // surface the public IPv4 found via WebRTC — fully self-hosted, no third-party
+  // endpoint and no IPv4-only subdomain (not possible on Cloudflare's proxy).
+  const ip = isV4(connIp) ? connIp : (rtcPublic.find(isV4) ?? connIp);
   const isAnon = data?.proxy || data?.hosting;
 
-  // Compare the server-seen IP with WebRTC-detected IPs to reveal proxy use.
   const localIp = rtcIps.find(isPrivateIp);
-  const altPublicIp = rtcIps.find((x) => !isPrivateIp(x) && x !== ip);
+  // Proxy/VPN leak = a public WebRTC IP of the SAME family as the connection IP
+  // but a different value. A cross-family v4/v6 pair is normal, not a leak.
+  const altPublicIp = rtcPublic.find((x) => x !== connIp && isV4(x) === isV4(connIp));
 
   // Lightweight, explainable anonymity score. Higher = harder to identify.
   const { score, factors } = useMemo(() => {

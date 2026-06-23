@@ -114,7 +114,7 @@ export default function SummaryDashboard() {
     });
   }
 
-  const curlCmd = "curl ip.huotao.com";
+  const curlCmd = "curl ip.huotao.com/ip";
   function copyCmd() {
     navigator.clipboard?.writeText(curlCmd).then(() => {
       setCmdCopied(true);

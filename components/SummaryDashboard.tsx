@@ -41,7 +41,29 @@ export default function SummaryDashboard() {
   const rtcDone = useRef(false);
 
   useEffect(() => {
-    fetch("/api/my-ip").then((r) => r.json()).then(setData).catch(() => setData(null)).finally(() => setLoading(false));
+    // Prefer the IPv4 address: on dual-stack / mobile networks the connection
+    // (CF-Connecting-IP) is often IPv6, but most users expect their IPv4. Get it
+    // from an IPv4-only endpoint and geolocate that; fall back to the connection IP.
+    (async () => {
+      try {
+        const r = await fetch("https://api4.ipify.org?format=json", { cache: "no-store" });
+        const v4 = (await r.json())?.ip as string | undefined;
+        if (v4 && /^(\d{1,3}\.){3}\d{1,3}$/.test(v4)) {
+          const g = await fetch(`/api/geoip?ip=${v4}`, { cache: "no-store" });
+          const gd = await g.json();
+          setData(gd?.status === "success" ? gd : { ...gd, query: v4, ip: v4 });
+          return;
+        }
+        throw new Error("no ipv4");
+      } catch {
+        try {
+          const m = await fetch("/api/my-ip");
+          setData(await m.json());
+        } catch {
+          setData(null);
+        }
+      }
+    })().finally(() => setLoading(false));
     fetchTrace().then((tr) => setColo(tr.colo ?? null)).catch(() => setColo(null));
     setClientFlags({
       dnt: navigator.doNotTrack === "1" || (navigator as unknown as { msDoNotTrack?: string }).msDoNotTrack === "1",
@@ -128,7 +150,8 @@ export default function SummaryDashboard() {
 
   return (
     <section className="surface border-themed rounded-3xl overflow-hidden shadow-sm">
-      <div className="px-6 sm:px-8 py-7 grid gap-6 md:grid-cols-[minmax(0,1.4fr)_auto] md:items-center">
+      <div className="px-5 sm:px-8 py-6 sm:py-7">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1.4fr)_auto] md:items-center">
         {/* Left: IP + meta */}
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
@@ -141,7 +164,7 @@ export default function SummaryDashboard() {
           </div>
 
           <div className="flex items-center gap-3 mb-4">
-            <h1 className="text-3xl sm:text-4xl font-bold font-mono text-fg break-all tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-bold font-mono text-fg break-all tracking-tight">
               {loading ? <Loader2 size={28} className="animate-spin text-[var(--accent)]" /> : ip ?? "—"}
             </h1>
             {ip && (
@@ -180,9 +203,9 @@ export default function SummaryDashboard() {
             {/* Location */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
               <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><MapPin size={13} /> {t("位置", "Location", { ja: "位置", de: "Standort", ko: "위치", fr: "Emplacement", es: "Ubicación", ru: "Местоположение", vi: "Vị trí", pt: "Localização" })}</div>
-              <div className="text-sm font-semibold text-fg truncate">
-                <span className="mr-1">{flag(data?.countryCode)}</span>
-                {data?.city ? `${data.city}, ${data.country}` : data?.country ?? "—"}
+              <div className="text-sm font-semibold text-fg truncate flex items-center gap-1.5">
+                <span className="text-xl sm:text-2xl leading-none shrink-0">{flag(data?.countryCode)}</span>
+                <span className="truncate">{data?.city ? `${data.city}, ${data.country}` : data?.country ?? "—"}</span>
               </div>
             </div>
             {/* ISP / ASN */}
@@ -208,19 +231,11 @@ export default function SummaryDashboard() {
             </div>
           </div>
 
-          {/* Terminal one-liner */}
-          <div className="mt-3 flex items-center gap-2 surface-2 border border-themed rounded-xl px-3.5 py-2.5">
-            <Terminal size={14} className="text-[var(--accent)] shrink-0" />
-            <code className="text-sm font-mono text-fg truncate flex-1">{curlCmd}</code>
-            <button onClick={copyCmd} className="p-1.5 rounded-md text-muted hover:surface shrink-0" aria-label="copy command">
-              {cmdCopied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
-            </button>
-          </div>
         </div>
 
         {/* Right: anonymity ring */}
         <div
-          className="relative flex flex-col items-center justify-center md:border-l border-themed md:pl-6"
+          className="relative flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-themed pt-5 md:pt-0 md:pl-6"
           onMouseEnter={() => setShowBreakdown(true)}
           onMouseLeave={() => setShowBreakdown(false)}
         >
@@ -251,6 +266,16 @@ export default function SummaryDashboard() {
               </div>
             </div>
           )}
+        </div>
+        </div>
+
+        {/* Terminal one-liner — placed below, full width */}
+        <div className="mt-5 flex items-center gap-2 surface-2 border border-themed rounded-xl px-3.5 py-2.5">
+          <Terminal size={14} className="text-[var(--accent)] shrink-0" />
+          <code className="text-sm font-mono text-fg truncate flex-1">{curlCmd}</code>
+          <button onClick={copyCmd} className="p-1.5 rounded-md text-muted hover:surface shrink-0" aria-label="copy command">
+            {cmdCopied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+          </button>
         </div>
       </div>
     </section>

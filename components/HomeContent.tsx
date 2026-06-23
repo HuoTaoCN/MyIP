@@ -64,6 +64,11 @@ export default function HomeContent() {
             ja: "データは ip-api.com と公開 RDAP / DNSBL サービスより · ブラウザ検査はすべて端末上で実行",
             de: "Daten via ip-api.com & öffentliche RDAP / DNSBL-Dienste · Alle Browser-Checks laufen lokal",
             ko: "데이터 제공: ip-api.com 및 공개 RDAP / DNSBL · 모든 브라우저 검사는 기기에서 로컬 실행",
+            fr: "Données via ip-api.com et services publics RDAP / DNSBL · Toutes les vérifications du navigateur s'exécutent localement",
+            es: "Datos vía ip-api.com y servicios públicos RDAP / DNSBL · Todas las comprobaciones del navegador se ejecutan localmente",
+            ru: "Данные через ip-api.com и публичные сервисы RDAP / DNSBL · Все проверки браузера выполняются локально",
+            vi: "Dữ liệu qua ip-api.com và dịch vụ công khai RDAP / DNSBL · Mọi kiểm tra trình duyệt chạy cục bộ trên thiết bị của bạn",
+            pt: "Dados via ip-api.com e serviços públicos RDAP / DNSBL · Todas as verificações do navegador são feitas localmente",
           }
         )}
       </p>

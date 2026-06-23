@@ -29,10 +29,10 @@ export default function Footer() {
 
         {/* Site links */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted mb-6 pt-6 border-t border-themed">
-          <Link href="/" className="hover:text-fg">{t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈" })}</Link>
+          <Link href="/" className="hover:text-fg">{t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈", fr: "Accueil", es: "Inicio", ru: "Главная", vi: "Trang chủ", pt: "Início" })}</Link>
           <Link href="/faq" className="hover:text-fg">{t("常见问题", "FAQ", { ja: "よくある質問", de: "FAQ", ko: "FAQ" })}</Link>
-          <Link href="/about" className="hover:text-fg">{t("关于", "About", { ja: "概要", de: "Über", ko: "소개" })}</Link>
-          <Link href="/privacy-policy" className="hover:text-fg">{t("隐私政策", "Privacy Policy", { ja: "プライバシーポリシー", de: "Datenschutz", ko: "개인정보 처리방침" })}</Link>
+          <Link href="/about" className="hover:text-fg">{t("关于", "About", { ja: "概要", de: "Über", ko: "소개", fr: "À propos", es: "Acerca de", ru: "О сайте", vi: "Giới thiệu", pt: "Sobre" })}</Link>
+          <Link href="/privacy-policy" className="hover:text-fg">{t("隐私政策", "Privacy Policy", { ja: "プライバシーポリシー", de: "Datenschutz", ko: "개인정보 처리방침", fr: "Confidentialité", es: "Privacidad", ru: "Конфиденциальность", vi: "Quyền riêng tư", pt: "Privacidade" })}</Link>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -41,7 +41,7 @@ export default function Footer() {
             MyIP
           </div>
           <p className="text-sm text-muted">
-            © {new Date().getFullYear()} MyIP · {t("免费隐私与网络工具包", "Free Privacy & Network Toolkit", { ja: "無料プライバシー＆ネットワークツールキット", de: "Kostenloses Privatsphäre- & Netzwerk-Toolkit", ko: "무료 개인정보 및 네트워크 도구" })}
+            © {new Date().getFullYear()} MyIP · {t("免费隐私与网络工具包", "Free Privacy & Network Toolkit", { ja: "無料プライバシー＆ネットワークツールキット", de: "Kostenloses Privatsphäre- & Netzwerk-Toolkit", ko: "무료 개인정보 및 네트워크 도구", fr: "Boîte à outils gratuite IP & confidentialité", es: "Kit gratuito de privacidad y red", ru: "Бесплатный набор инструментов для IP и конфиденциальности", vi: "Bộ công cụ IP & quyền riêng tư miễn phí", pt: "Kit gratuito de privacidade e rede" })}
           </p>
         </div>
       </div>

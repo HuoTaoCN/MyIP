@@ -21,9 +21,9 @@ export default function ThemeSwitcher() {
   }, []);
 
   const options = [
-    { value: "system", label: t("跟随系统", "System", { ja: "システム", de: "System", ko: "시스템" }), icon: Monitor },
-    { value: "light", label: t("浅色", "Light", { ja: "ライト", de: "Hell", ko: "라이트" }), icon: Sun },
-    { value: "dark", label: t("深色", "Dark", { ja: "ダーク", de: "Dunkel", ko: "다크" }), icon: Moon },
+    { value: "system", label: t("跟随系统", "System", { ja: "システム", de: "System", ko: "시스템", fr: "Système", es: "Sistema", ru: "Система", vi: "Hệ thống", pt: "Sistema" }), icon: Monitor },
+    { value: "light", label: t("浅色", "Light", { ja: "ライト", de: "Hell", ko: "라이트", fr: "Clair", es: "Claro", ru: "Светлая", vi: "Sáng", pt: "Claro" }), icon: Sun },
+    { value: "dark", label: t("深色", "Dark", { ja: "ダーク", de: "Dunkel", ko: "다크", fr: "Sombre", es: "Oscuro", ru: "Тёмная", vi: "Tối", pt: "Escuro" }), icon: Moon },
   ];
 
   const current = options.find((o) => o.value === theme) ?? options[0];

@@ -81,27 +81,27 @@ export default function SummaryDashboard() {
   // Lightweight, explainable anonymity score. Higher = harder to identify.
   const { score, factors } = useMemo(() => {
     const f: ScoreFactor[] = [
-      { label: t("使用 VPN / 代理 / 数据中心", "VPN / proxy / datacenter"), pts: 35, on: !!isAnon },
-      { label: t("移动 / 共享网络", "Mobile / shared network"), pts: 10, on: !!data?.mobile },
-      { label: t("已开启 Do Not Track", "Do Not Track enabled"), pts: 15, on: clientFlags.dnt },
-      { label: t("已禁用 Cookie", "Cookies disabled"), pts: 15, on: clientFlags.cookiesOff },
+      { label: t("使用 VPN / 代理 / 数据中心", "VPN / proxy / datacenter", { fr: "VPN / proxy / centre de données", es: "VPN / proxy / centro de datos", ru: "VPN / прокси / дата-центр", vi: "VPN / proxy / trung tâm dữ liệu", pt: "VPN / proxy / data center" }), pts: 35, on: !!isAnon },
+      { label: t("移动 / 共享网络", "Mobile / shared network", { fr: "Mobile / réseau partagé", es: "Móvil / red compartida", ru: "Мобильная / общая сеть", vi: "Di động / mạng dùng chung", pt: "Móvel / rede compartilhada" }), pts: 10, on: !!data?.mobile },
+      { label: t("已开启 Do Not Track", "Do Not Track enabled", { fr: "Do Not Track activé", es: "Do Not Track activado", ru: "Do Not Track включён", vi: "Đã bật Do Not Track", pt: "Do Not Track ativado" }), pts: 15, on: clientFlags.dnt },
+      { label: t("已禁用 Cookie", "Cookies disabled", { fr: "Cookies désactivés", es: "Cookies desactivadas", ru: "Cookie отключены", vi: "Đã tắt Cookie", pt: "Cookies desativados" }), pts: 15, on: clientFlags.cookiesOff },
     ];
     const s = Math.min(100, 25 + f.reduce((a, x) => a + (x.on ? x.pts : 0), 0));
     return { score: s, factors: f };
   }, [data, isAnon, clientFlags, t]);
 
   const grade = score >= 70
-    ? { label: t("匿名性强", "Strong"), color: "#10b981" }
+    ? { label: t("匿名性强", "Strong", { fr: "Fort", es: "Fuerte", ru: "Высокая", vi: "Mạnh", pt: "Forte" }), color: "#10b981" }
     : score >= 45
-      ? { label: t("中等", "Moderate"), color: "#f59e0b" }
-      : { label: t("易被识别", "Exposed"), color: "#ef4444" };
+      ? { label: t("中等", "Moderate", { fr: "Modéré", es: "Moderado", ru: "Средняя", vi: "Trung bình", pt: "Moderado" }), color: "#f59e0b" }
+      : { label: t("易被识别", "Exposed", { fr: "Exposé", es: "Expuesto", ru: "Уязвимая", vi: "Dễ nhận diện", pt: "Exposto" }), color: "#ef4444" };
 
   // IP type + risk score (from ip-api proxy/hosting/mobile flags).
   const risk = data ? assessIp(data) : null;
   const typeLabel: Record<IpTypeKey, string> = {
-    residential: t("住宅宽带", "Residential"),
-    datacenter: t("数据中心/机房", "Datacenter"),
-    mobile: t("移动网络", "Mobile"),
+    residential: t("住宅宽带", "Residential", { fr: "Résidentiel", es: "Residencial", ru: "Домашний", vi: "Dân cư", pt: "Residencial" }),
+    datacenter: t("数据中心/机房", "Datacenter", { fr: "Centre de données", es: "Centro de datos", ru: "Дата-центр", vi: "Trung tâm dữ liệu", pt: "Data center" }),
+    mobile: t("移动网络", "Mobile", { fr: "Mobile", es: "Móvil", ru: "Мобильный", vi: "Di động", pt: "Móvel" }),
     proxy: t("代理 / VPN", "Proxy / VPN"),
   };
   const riskColor = risk?.level === "high" ? "text-red-500" : risk?.level === "medium" ? "text-amber-500" : "text-emerald-500";
@@ -135,8 +135,8 @@ export default function SummaryDashboard() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-sm text-muted">
               {altPublicIp
-                ? t("公网 IP（网站所见）", "Public IP (as websites see you)", { ja: "公開IP（サイトが見るIP）", de: "Öffentliche IP (von Websites gesehen)", ko: "공개 IP (사이트가 보는 IP)" })
-                : t("你的公网 IP", "Your public IP", { ja: "あなたの公開IP", de: "Ihre öffentliche IP", ko: "내 공개 IP" })}
+                ? t("公网 IP（网站所见）", "Public IP (as websites see you)", { ja: "公開IP（サイトが見るIP）", de: "Öffentliche IP (von Websites gesehen)", ko: "공개 IP (사이트가 보는 IP)", fr: "IP publique (vue par les sites)", es: "IP pública (como te ven los sitios)", ru: "Публичный IP (как видят сайты)", vi: "IP công khai (như các trang web thấy)", pt: "IP público (como os sites veem)" })
+                : t("你的公网 IP", "Your public IP", { ja: "あなたの公開IP", de: "Ihre öffentliche IP", ko: "내 공개 IP", fr: "Votre IP publique", es: "Tu IP pública", ru: "Ваш публичный IP", vi: "IP công khai của bạn", pt: "Seu IP público" })}
             </span>
           </div>
 
@@ -158,10 +158,10 @@ export default function SummaryDashboard() {
                 <>
                   <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
                     <AlertTriangle size={13} className="shrink-0" />
-                    {t("检测到不同的公网 IP — 你可能正在使用代理 / VPN", "Different public IP detected — you may be using a proxy / VPN")}
+                    {t("检测到不同的公网 IP — 你可能正在使用代理 / VPN", "Different public IP detected — you may be using a proxy / VPN", { fr: "IP publique différente détectée — vous utilisez peut-être un proxy / VPN", es: "IP pública diferente detectada — puede que uses un proxy / VPN", ru: "Обнаружен другой публичный IP — возможно, вы используете прокси / VPN", vi: "Phát hiện IP công khai khác — bạn có thể đang dùng proxy / VPN", pt: "IP público diferente detectado — você pode estar usando um proxy / VPN" })}
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-xs text-muted w-32 shrink-0">{t("真实公网 IP", "Real public IP", { ja: "実際の公開IP", de: "Echte öffentliche IP", ko: "실제 공개 IP" })}</span>
+                    <span className="text-xs text-muted w-32 shrink-0">{t("真实公网 IP", "Real public IP", { ja: "実際の公開IP", de: "Echte öffentliche IP", ko: "실제 공개 IP", fr: "IP publique réelle", es: "IP pública real", ru: "Реальный публичный IP", vi: "IP công khai thật", pt: "IP público real" })}</span>
                     <span className="font-mono font-semibold text-amber-600 dark:text-amber-400 break-all">{altPublicIp}</span>
                     <span className="text-[10px] uppercase tracking-wide bg-amber-500/15 text-amber-500 rounded-full px-2 py-0.5 shrink-0">WebRTC</span>
                   </div>
@@ -169,7 +169,7 @@ export default function SummaryDashboard() {
               )}
               {localIp && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-xs text-muted w-32 shrink-0 flex items-center gap-1"><Network size={12} /> {t("本机内网 IP", "Local IP", { ja: "ローカルIP", de: "Lokale IP", ko: "로컬 IP" })}</span>
+                  <span className="text-xs text-muted w-32 shrink-0 flex items-center gap-1"><Network size={12} /> {t("本机内网 IP", "Local IP", { ja: "ローカルIP", de: "Lokale IP", ko: "로컬 IP", fr: "IP locale", es: "IP local", ru: "Локальный IP", vi: "IP nội bộ", pt: "IP local" })}</span>
                   <span className="font-mono font-medium text-fg break-all">{localIp}</span>
                 </div>
               )}
@@ -179,7 +179,7 @@ export default function SummaryDashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
-              <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><MapPin size={13} /> {t("位置", "Location", { ja: "位置", de: "Standort", ko: "위치" })}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><MapPin size={13} /> {t("位置", "Location", { ja: "位置", de: "Standort", ko: "위치", fr: "Emplacement", es: "Ubicación", ru: "Местоположение", vi: "Vị trí", pt: "Localização" })}</div>
               <div className="text-sm font-semibold text-fg truncate">
                 <span className="mr-1">{flag(data?.countryCode)}</span>
                 {data?.city ? `${data.city}, ${data.country}` : data?.country ?? "—"}
@@ -195,14 +195,14 @@ export default function SummaryDashboard() {
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
               <div className="flex items-center gap-1.5 text-xs text-muted mb-1">
                 {isAnon ? <AlertTriangle size={13} className="text-amber-500" /> : <ShieldCheck size={13} className="text-emerald-500" />}
-                {t("IP 类型 · 风险", "IP type · risk", { ja: "IPタイプ・リスク", de: "IP-Typ · Risiko", ko: "IP 유형 · 위험" })}
+                {t("IP 类型 · 风险", "IP type · risk", { ja: "IPタイプ・リスク", de: "IP-Typ · Risiko", ko: "IP 유형 · 위험", fr: "Type IP · risque", es: "Tipo IP · riesgo", ru: "Тип IP · риск", vi: "Loại IP · rủi ro", pt: "Tipo IP · risco" })}
               </div>
               <div className={`text-sm font-semibold truncate ${riskColor}`}>{risk ? typeLabel[risk.typeKey] : "—"}</div>
-              {risk && <div className="text-xs text-muted">{t("风险", "Risk")} {risk.score}/100</div>}
+              {risk && <div className="text-xs text-muted">{t("风险", "Risk", { fr: "Risque", es: "Riesgo", ru: "Риск", vi: "Rủi ro", pt: "Risco" })} {risk.score}/100</div>}
             </div>
             {/* CDN edge node */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
-              <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><Server size={13} /> {t("CDN 节点", "CDN node", { ja: "CDNノード", de: "CDN-Knoten", ko: "CDN 노드" })}</div>
+              <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><Server size={13} /> {t("CDN 节点", "CDN node", { ja: "CDNノード", de: "CDN-Knoten", ko: "CDN 노드", fr: "Nœud CDN", es: "Nodo CDN", ru: "Узел CDN", vi: "Nút CDN", pt: "Nó CDN" })}</div>
               <div className="text-sm font-semibold text-fg truncate">{colo ?? "—"}</div>
               {colo && coloCity(colo, lang === "zh") && <div className="text-xs text-muted truncate">{coloCity(colo, lang === "zh")}</div>}
             </div>
@@ -234,14 +234,14 @@ export default function SummaryDashboard() {
             <text x="46" y="46" textAnchor="middle" dominantBaseline="central"
               fontSize="22" fontWeight="700" fill="var(--fg)">{loading ? "" : score}</text>
           </svg>
-          <div className="text-xs text-muted mt-1.5">{t("匿名性评分", "Anonymity", { ja: "匿名性", de: "Anonymität", ko: "익명성" })}</div>
+          <div className="text-xs text-muted mt-1.5">{t("匿名性评分", "Anonymity", { ja: "匿名性", de: "Anonymität", ko: "익명성", fr: "Anonymat", es: "Anonimato", ru: "Анонимность", vi: "Ẩn danh", pt: "Anonimato" })}</div>
           <div className="text-sm font-semibold" style={{ color: grade.color }}>{grade.label}</div>
 
           {showBreakdown && !loading && (
             <div className="absolute top-full right-0 mt-2 z-30 w-60 surface border-themed rounded-xl px-3 py-2.5 shadow-xl text-left">
-              <p className="text-xs text-muted mb-2">{t("评分构成（满分 100）", "Score factors (max 100)")}</p>
+              <p className="text-xs text-muted mb-2">{t("评分构成（满分 100）", "Score factors (max 100)", { fr: "Composition du score (max 100)", es: "Factores de puntuación (máx. 100)", ru: "Состав оценки (макс. 100)", vi: "Thành phần điểm (tối đa 100)", pt: "Fatores da pontuação (máx. 100)" })}</p>
               <div className="space-y-1">
-                <div className="flex justify-between text-xs"><span className="text-muted">{t("基础分", "Baseline")}</span><span className="text-fg font-medium">25</span></div>
+                <div className="flex justify-between text-xs"><span className="text-muted">{t("基础分", "Baseline", { fr: "Base", es: "Base", ru: "База", vi: "Cơ bản", pt: "Base" })}</span><span className="text-fg font-medium">25</span></div>
                 {factors.map((f) => (
                   <div key={f.label} className="flex justify-between text-xs gap-2">
                     <span className={f.on ? "text-fg" : "text-muted line-through"}>{f.label}</span>

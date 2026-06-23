@@ -21,13 +21,13 @@ export default function Navbar() {
         {/* Right: nav links + controls, all vertically centered */}
         <nav className="flex items-center gap-2 sm:gap-4">
           <Link href="/" className="hidden md:inline text-sm text-muted hover:text-fg">
-            {t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈" })}
+            {t("首页", "Home", { ja: "ホーム", de: "Start", ko: "홈", fr: "Accueil", es: "Inicio", ru: "Главная", vi: "Trang chủ", pt: "Início" })}
           </Link>
           <Link href="/faq" className="hidden md:inline text-sm text-muted hover:text-fg">
             {t("常见问题", "FAQ", { ja: "よくある質問", de: "FAQ", ko: "FAQ" })}
           </Link>
           <Link href="/about" className="hidden md:inline text-sm text-muted hover:text-fg">
-            {t("关于", "About", { ja: "概要", de: "Über", ko: "소개" })}
+            {t("关于", "About", { ja: "概要", de: "Über", ko: "소개", fr: "À propos", es: "Acerca de", ru: "О сайте", vi: "Giới thiệu", pt: "Sobre" })}
           </Link>
           <div className="flex items-center gap-2">
             <ThemeSwitcher />

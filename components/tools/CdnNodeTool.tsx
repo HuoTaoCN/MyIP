@@ -34,6 +34,8 @@ export default function CdnNodeTool() {
     { label: t("你的 IP", "Your IP"), value: trace.ip },
     { label: t("HTTP 协议", "HTTP"), value: trace.http },
     { label: t("TLS 版本", "TLS"), value: trace.tls },
+    { label: t("密钥交换", "Key exchange"), value: trace.kex },
+    { label: "SNI", value: trace.sni },
     { label: "WARP", value: trace.warp },
   ];
 

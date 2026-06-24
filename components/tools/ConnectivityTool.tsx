@@ -14,9 +14,17 @@ const DOMESTIC: Site[] = [
 ];
 const INTERNATIONAL: Site[] = [
   { name: "Google", url: "https://www.google.com/generate_204" },
-  { name: "YouTube", url: "https://www.youtube.com/favicon.ico" },
   { name: "GitHub", url: "https://github.com/favicon.ico" },
   { name: "Cloudflare", url: "https://www.cloudflare.com/favicon.ico" },
+  { name: "Wikipedia", url: "https://www.wikipedia.org/favicon.ico" },
+];
+const STREAMING: Site[] = [
+  { name: "YouTube", url: "https://www.youtube.com/favicon.ico" },
+  { name: "Netflix", url: "https://www.netflix.com/favicon.ico" },
+  { name: "Disney+", url: "https://www.disneyplus.com/favicon.ico" },
+  { name: "ChatGPT", url: "https://chatgpt.com/favicon.ico" },
+  { name: "Spotify", url: "https://open.spotify.com/favicon.ico" },
+  { name: "TikTok", url: "https://www.tiktok.com/favicon.ico" },
 ];
 
 interface Result { ok: boolean; ms: number | null; }
@@ -50,7 +58,7 @@ export default function ConnectivityTool() {
 
   async function run() {
     setRunning(true);
-    const all = [...DOMESTIC, ...INTERNATIONAL];
+    const all = [...DOMESTIC, ...INTERNATIONAL, ...STREAMING];
     setResults(Object.fromEntries(all.map((s) => [s.name, "loading" as const])));
     await Promise.all(all.map(async (s) => {
       const r = await probe(s.url);
@@ -92,7 +100,8 @@ export default function ConnectivityTool() {
       </button>
       <Group title={t("国内站点", "Domestic")} sites={DOMESTIC} />
       <Group title={t("国际站点（探测封锁）", "International (block detection)")} sites={INTERNATIONAL} />
-      <p className="text-xs text-muted">{t("从你的浏览器直接探测各站点的可达性与延迟（取 3 次最小值），受 CORS 限制为近似值。", "Reachability + latency probed directly from your browser (min of 3); approximate due to CORS.")}</p>
+      <Group title={t("流媒体 / 服务", "Streaming / Services")} sites={STREAMING} />
+      <p className="text-xs text-muted">{t("从你的浏览器直接探测各站点的可达性与延迟（取 3 次最小值）。仅能测可达性，非完整区域解锁；受 CORS 限制为近似值。", "Reachability + latency probed directly from your browser (min of 3). Reachability only — not full region-unlock; approximate due to CORS.")}</p>
     </div>
   );
 }

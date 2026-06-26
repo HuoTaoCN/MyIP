@@ -188,9 +188,12 @@ export default function SummaryDashboard() {
             {/* Location */}
             <div className="surface-2 border border-themed rounded-xl px-3.5 py-3">
               <div className="flex items-center gap-1.5 text-xs text-muted mb-1"><MapPin size={13} /> {t("位置", "Location", { ja: "位置", de: "Standort", ko: "위치", fr: "Emplacement", es: "Ubicación", ru: "Местоположение", vi: "Vị trí", pt: "Localização" })}</div>
-              <div className="text-sm font-semibold text-fg truncate flex items-center gap-1.5">
-                <span className="text-xl sm:text-2xl leading-none shrink-0">{flag(data?.countryCode)}</span>
-                <span className="truncate">{data?.city ? `${data.city}, ${data.country}` : data?.country ?? "—"}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl leading-none shrink-0">{flag(data?.countryCode)}</span>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-fg truncate">{data?.country ?? "—"}</div>
+                  <div className="text-xs text-muted truncate">{[data?.city, data?.regionName].filter(Boolean).join(", ") || "—"}</div>
+                </div>
               </div>
             </div>
             {/* ISP / ASN */}
